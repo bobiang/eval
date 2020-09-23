@@ -12,7 +12,6 @@ import org.springframework.util.StringUtils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -48,7 +47,6 @@ public class ExcelGenerationServiceImpl implements ExcelGenerationService {
             }
         }
     }
-
     @Override
     public File generateExcelReport(ExcelData data) throws IOException {
         validateDate(data);
@@ -104,7 +102,8 @@ public class ExcelGenerationServiceImpl implements ExcelGenerationService {
 
         File currDir = new File(".");
         String path = currDir.getAbsolutePath();
-        String fileLocation = path.substring(0, path.length() - 1) + "temp.xlsx";  // TODO : file name cannot be hardcoded here
+        String fileLocation = path.substring(0, path.length() - 1) + data.getTitle();  // TODO : file name cannot be hardcoded
+        // here
 
         FileOutputStream outputStream = new FileOutputStream(fileLocation);
         workbook.write(outputStream);

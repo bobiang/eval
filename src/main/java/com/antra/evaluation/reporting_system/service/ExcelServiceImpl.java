@@ -17,18 +17,21 @@ public class ExcelServiceImpl implements ExcelService {
     @Autowired
     ExcelRepository excelRepository;
 
-    @Override
-    public InputStream getExcelBodyById(String id) {
+    public ExcelRepository getRepo() {
+        return excelRepository;
+    }
 
+    @Override
+    public InputStream getExcelBodyById(int id) {
         Optional<ExcelFile> fileInfo = excelRepository.getFileById(id);
-       // if (fileInfo.isPresent()) {
-            File file = new File("temp.xlsx");
-            try {
-                return new FileInputStream(file);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-      //  }
+         if (fileInfo.isPresent()) {
+        File file = new File(fileInfo.get().getExcelData().getTitle());
+        try {
+            return new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+          }
         return null;
     }
 
