@@ -7,6 +7,12 @@ public class ExcelDataSheet {
     private String title;
     private List<ExcelDataHeader> headers;
     private List<List<Object>> dataRows;
+    public ExcelDataSheet(){}
+    public ExcelDataSheet(String n, List<ExcelDataHeader> h, List<List<Object>> rows) {
+        this.title = n;
+        this.headers = h;
+        this.dataRows = rows;
+    }
 
     public String getTitle() {
         return title;

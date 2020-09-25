@@ -6,14 +6,15 @@ import com.antra.evaluation.reporting_system.pojo.report.ExcelDataSheet;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Data Stucture
@@ -29,7 +30,7 @@ import java.util.List;
  */
 @Service
 public class ExcelGenerationServiceImpl implements ExcelGenerationService {
-
+	@Async
     private void validateDate(ExcelData data) {
         if (data.getSheets().size() < 1) {
             throw new RuntimeException("Excel Data Error: no sheet is defined");
@@ -48,7 +49,7 @@ public class ExcelGenerationServiceImpl implements ExcelGenerationService {
             }
         }
     }
-
+	
     @Override
     public File generateExcelReport(ExcelData data) throws IOException {
         validateDate(data);
@@ -104,7 +105,8 @@ public class ExcelGenerationServiceImpl implements ExcelGenerationService {
 
         File currDir = new File(".");
         String path = currDir.getAbsolutePath();
-        String fileLocation = path.substring(0, path.length() - 1) + "temp.xlsx";  // TODO : file name cannot be hardcoded here
+        String fileLocation = path.substring(0, path.length() - 1) + data.getTitle();  // TODO : file name cannot be hardcoded
+        // here
 
         FileOutputStream outputStream = new FileOutputStream(fileLocation);
         workbook.write(outputStream);

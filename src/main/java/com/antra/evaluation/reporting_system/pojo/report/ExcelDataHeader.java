@@ -2,8 +2,12 @@ package com.antra.evaluation.reporting_system.pojo.report;
 
 public class ExcelDataHeader {
     private String name;
-    private ExcelDataType type;
+    private ExcelDataType type = ExcelDataType.STRING;
     private int width;
+    public ExcelDataHeader(){}
+    public ExcelDataHeader(String h) {
+        this.name = h;
+    }
 
     public String getName() {
         return name;
