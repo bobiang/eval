@@ -60,30 +60,9 @@ public class ExcelGenerationController {
             response.setResponse("Not Valid Input");
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
-        ExcelData data = new ExcelData(request);
-        String filename = data.getTitle();
-        String newName	=filename;
-        File f = new File(filename);
-        int prefix=1;
-        while (f.exists()) {
-        	synchronized(this) {
-        		prefix++;
-        		newName = prefix+"_"+filename;}
-            f=new File(newName);                      
-        }
-        response.setFilename(response.getResponse() + "set the filename to "+filename+"\n");
-        data.setTitle(newName);
-
-        ExcelFile file = new ExcelFile(id.getAndIncrement(), data);
-        this.excelService.getRepo().saveFile(file);
-        excelService.getExcelGen().generateExcelReport(data);
-        data.setSheets(null);
-
-        response.setResponse(response.getResponse() +"successfully saved");
+        
+        response = this.excelService.createExcel(request);
         log.info(response.getResponse());
-        response.setFileId(id.decrementAndGet());
-        id.getAndIncrement();
-        response.setFilename(data.getTitle());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -96,97 +75,55 @@ public class ExcelGenerationController {
             response.setResponse("Not Valid Input");
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
-        ExcelData data = new ExcelData(request);
-        String filename = data.getTitle();
-        String newName	=filename;
-        File f = new File(filename);
-        int prefix=1;
-        while (f.exists()) {
-        	synchronized(this) {
-        		prefix++;
-        		newName = prefix+"_"+filename;}
-            f=new File(newName);                      
-        }
-        response.setFilename(response.getResponse() + "set the filename to "+filename+"\n");
-        data.setTitle(newName);
-
-        ExcelFile file = new ExcelFile(id.getAndIncrement(), data);
-        this.excelService.getRepo().saveFile(file);
-        excelService.getExcelGen().generateExcelReport(data);
-
-        data.setSheets(null);
-        response.setResponse(response.getResponse() +"successfully saved");
-
+        
+        response = this.excelService.createMultiExcel(request);
         log.info(response.getResponse());
-        response.setFileId(id.decrementAndGet());
-        id.getAndIncrement();
-        response.setFilename(data.getTitle());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/excel")
     @ApiOperation("List all existing files")
     public ResponseEntity<List<ExcelResponse>> listExcels() {
-        var response = new ArrayList<ExcelResponse>();
-        try {
-            List<ExcelFile> files = this.excelService.getRepo().getFiles();
-            for (ExcelFile file: files) {
-                ExcelData data = file.getExcelData();
-                ExcelResponse r = new ExcelResponse();
-                r.setFileId(file.getId());
-                r.setFilename(data.getTitle());
-                response.add(r);
-            }
-        } catch (Exception e) {
-            log.error(e.toString());
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
 
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return excelService.list();
     }
 
     @GetMapping("/excel/{id}/content")
     public void downloadExcel(@PathVariable int id, HttpServletResponse response) throws IOException, InterruptedException, ExecutionException {
-        if (this.excelService.getRepo() == null) {
-            log.error("File Not Exist");
-            return;
-        }
-        Optional<ExcelFile> file = this.excelService.getRepo().getFileById(id);
-        if (!file.isPresent()) {
-            log.error("File Not Exist");
-            return;
-        }
-        ExcelFile excelFile = file.get();
+       
+        ExcelFile excelFile = excelService.download(id).get();
         String filename = excelFile.getExcelData().getTitle();
         InputStream fis = excelService.getExcelBodyById(id);
-        
-        
-        
+       
         response.setHeader("Content-Type","application/vnd.ms-excel");
         response.setHeader("Content-Disposition","attachment; filename="+filename);
         FileCopyUtils.copy(fis, response.getOutputStream());
-       
-
 
     }
 
     @DeleteMapping("/excel/{id}")
     public ResponseEntity<ExcelResponse> deleteExcel(@PathVariable int id) throws InterruptedException, ExecutionException {
         var response = new ExcelResponse();
-        Optional<ExcelFile> excelFile = this.excelService.getRepo().getFileById(id);
-        if (!excelFile.isPresent()) {
+        Optional<ExcelFile> excelFile = null;
+        try {
+	        excelFile=excelService.delete(id);
+        }catch(NullPointerException e) {
+        	e.printStackTrace();
+        }
+        if(excelFile==null) {
             log.error("File Not Exist");
             response.setResponse("File Not Exist");
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);         
         }
-        this.excelService.getRepo().deleteFile(id);
-
         response.setResponse("successfully delete file "+id);
         response.setFilename(excelFile.get().getExcelData().getTitle());
-        log.info("successfully delete file "+id);
+        log.info(response.getResponse());
         return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+        
+
+
+	        
+        }
 }
 
 // Log
