@@ -51,7 +51,7 @@ public class ExcelGenerationServiceImpl implements ExcelGenerationService {
     }
 	
     @Override
-    public File generateExcelReport(ExcelData data) throws IOException {
+    public synchronized File generateExcelReport(ExcelData data) throws IOException {
         validateDate(data);
         XSSFWorkbook workbook = new XSSFWorkbook();
 

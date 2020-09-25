@@ -41,16 +41,14 @@ public class ExcelGenerationController {
 
     private static final Logger log = LoggerFactory.getLogger(ExcelGenerationController.class);
     ExcelService excelService;
-//    ExcelRepository repo;
-
-    //ExcelGenerationService reportService = new ExcelGenerationServiceImpl();
+    
+    
     @Autowired
     public ExcelGenerationController(ExcelService excelService) {
         this.excelService = excelService;
-//        this.repo = this.excelService.getRepo();
+
     }
 
-    //private int id = 1;
     AtomicInteger id = new AtomicInteger(1);
 
     @PostMapping("/excel")
@@ -64,14 +62,18 @@ public class ExcelGenerationController {
         }
         ExcelData data = new ExcelData(request);
         String filename = data.getTitle();
+        String newName	=filename;
         File f = new File(filename);
+        int prefix=1;
         while (f.exists()) {
-            filename = "new_"+filename;
-            f=new File(filename);
-                       
+        	synchronized(this) {
+        		prefix++;
+        		newName = prefix+"_"+filename;}
+            f=new File(newName);                      
         }
         response.setFilename(response.getResponse() + "set the filename to "+filename+"\n");
-        data.setTitle(filename);
+        data.setTitle(newName);
+
         ExcelFile file = new ExcelFile(id.getAndIncrement(), data);
         this.excelService.getRepo().saveFile(file);
         excelService.getExcelGen().generateExcelReport(data);
@@ -96,14 +98,18 @@ public class ExcelGenerationController {
         }
         ExcelData data = new ExcelData(request);
         String filename = data.getTitle();
+        String newName	=filename;
         File f = new File(filename);
+        int prefix=1;
         while (f.exists()) {
-            filename = "new_"+filename;
-            f=new File(filename);
-                       
+        	synchronized(this) {
+        		prefix++;
+        		newName = prefix+"_"+filename;}
+            f=new File(newName);                      
         }
         response.setFilename(response.getResponse() + "set the filename to "+filename+"\n");
-        data.setTitle(filename);
+        data.setTitle(newName);
+
         ExcelFile file = new ExcelFile(id.getAndIncrement(), data);
         this.excelService.getRepo().saveFile(file);
         excelService.getExcelGen().generateExcelReport(data);

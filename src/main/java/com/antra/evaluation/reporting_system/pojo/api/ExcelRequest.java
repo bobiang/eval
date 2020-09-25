@@ -3,7 +3,7 @@ package com.antra.evaluation.reporting_system.pojo.api;
 import java.util.List;
 
 public class ExcelRequest {
-    private String filename;
+    private String filename="untitled";
     private List<String> headers;
     private String description;
     private List<List<Object>> data;
